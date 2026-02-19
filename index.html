@@ -4,22 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Student ID Card Builder (Canvas)</title>
+
   <style>
     :root{
       --bg:#0b1020;
-      --panel:#121a33;
       --muted:#9fb0d0;
       --text:#eaf0ff;
       --line:rgba(255,255,255,.08);
-      --accent:#2bd67b;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: radial-gradient(1200px 700px at 20% -10%, rgba(43,214,123,.20), transparent 55%),
-                  radial-gradient(1000px 650px at 110% 10%, rgba(76,125,255,.20), transparent 55%),
-                  var(--bg);
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(43,214,123,.20), transparent 55%),
+        radial-gradient(1000px 650px at 110% 10%, rgba(76,125,255,.20), transparent 55%),
+        var(--bg);
       color:var(--text);
       padding:24px;
     }
@@ -33,7 +33,6 @@
     @media (max-width: 980px){
       .wrap{grid-template-columns:1fr}
     }
-
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
       border:1px solid var(--line);
@@ -45,12 +44,9 @@
     h1{font-size:18px;margin:0 0 10px 0;letter-spacing:.2px}
     .hint{font-size:12px;color:var(--muted);line-height:1.35;margin:0 0 14px 0}
 
-    .form{
-      display:grid;
-      gap:10px;
-    }
+    .form{display:grid;gap:10px}
     label{font-size:12px;color:var(--muted)}
-    input[type="text"], input[type="date"], input[type="number"], select{
+    input[type="text"], input[type="date"], input[type="number"], select, input[type="color"]{
       width:100%;
       padding:10px 11px;
       background: rgba(0,0,0,.18);
@@ -59,7 +55,8 @@
       border-radius:12px;
       outline:none;
     }
-    input[type="text"]:focus, input[type="date"]:focus, input[type="number"]:focus, select:focus{
+    input[type="color"]{padding:6px;height:42px}
+    input:focus, select:focus{
       border-color: rgba(43,214,123,.55);
       box-shadow: 0 0 0 3px rgba(43,214,123,.14);
     }
@@ -86,17 +83,13 @@
       background: rgba(255,255,255,.06);
       color:var(--text);
       cursor:pointer;
+      transition:.2s;
     }
     button.primary{background: rgba(43,214,123,.16); border-color: rgba(43,214,123,.35)}
-    button:hover{filter:brightness(1.05)}
+    button:hover{filter:brightness(1.05); transform:translateY(-1px)}
     .small{font-size:12px;color:var(--muted)}
 
-    .preview{
-      padding:16px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
+    .preview{padding:16px;display:flex;flex-direction:column;gap:12px}
     .canvasWrap{
       padding:14px;
       background: rgba(0,0,0,.18);
@@ -121,8 +114,20 @@
       font-size:12px;
     }
     .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--line);background: rgba(255,255,255,.04)}
+    .err{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,80,80,.35);
+      background: rgba(255,80,80,.10);
+      color:#ffd7d7;
+      font-size:12px;
+      white-space:pre-wrap;
+    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
 
@@ -249,13 +254,15 @@
           </div>
 
           <div class="btns">
-            <button class="primary" id="downloadBtn">Download PNG</button>
-            <button id="resetBtn">Reset Default</button>
+            <button class="primary" id="downloadBtn" type="button">Download PNG</button>
+            <button id="resetBtn" type="button">Reset Default</button>
           </div>
 
           <div class="small">
             Tip: Raha tsy mametraka logo/sary ianao dia hiseho default (placeholder) foana.
           </div>
+
+          <div id="errBox" class="err"></div>
         </div>
       </div>
     </div>
@@ -278,9 +285,16 @@
   </div>
 
   <script>
+    // Show runtime errors on page (helpful for GitHub Pages debugging)
+    const errBox = document.getElementById("errBox");
+    window.addEventListener("error", (e) => {
+      if (!errBox) return;
+      errBox.style.display = "block";
+      errBox.textContent = "JS Error: " + (e.message || e.error || "Unknown") + "\\nAt: " + (e.filename || "") + ":" + (e.lineno || "") ;
+    });
+
     const $ = (id) => document.getElementById(id);
 
-    // UI Elements
     const nameEl = $("name");
     const uidEl = $("uid");
     const dobEl = $("dob");
@@ -298,11 +312,9 @@
     const downloadBtn = $("downloadBtn");
     const resetBtn = $("resetBtn");
 
-    // Canvas
     const canvas = $("cardCanvas");
     const ctx = canvas.getContext("2d");
 
-    // Image state
     let photoImg = null;
     let logoImg = null;
     let signatureImg = null;
@@ -322,9 +334,7 @@
     };
 
     function pad2(n){ return String(n).padStart(2, "0"); }
-
     function formatDOB(iso){
-      // Output: DD/MM/YYYY like your preview
       if (!iso) return "";
       const [y,m,d] = iso.split("-");
       if (!y || !m || !d) return iso;
@@ -360,12 +370,10 @@
     function drawShadowedCard(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
 
-      // Background
       ctx.save();
       ctx.fillStyle = "#f7f8fb";
       ctx.fillRect(0,0,canvas.width,canvas.height);
 
-      // Subtle vignette
       const g = ctx.createRadialGradient(260, 80, 10, 260, 80, 900);
       g.addColorStop(0, "rgba(0,0,0,0.05)");
       g.addColorStop(1, "rgba(0,0,0,0)");
@@ -373,7 +381,6 @@
       ctx.fillRect(0,0,canvas.width,canvas.height);
       ctx.restore();
 
-      // Outer rounded border
       ctx.save();
       ctx.strokeStyle = "rgba(0,0,0,.12)";
       ctx.lineWidth = 3;
@@ -383,8 +390,8 @@
     }
 
     function drawLogoBlock(accentColor){
-      const x = 60, y = 30;  // moved higher to avoid collision with faculty text
-      const w = 600, h = 200; // enlarged area
+      const x = 60, y = 30;
+      const w = 600, h = 200;
 
       if (logoImg){
         const ar = logoImg.width / logoImg.height;
@@ -393,22 +400,20 @@
         const dx = x;
         const dy = y + (h - dh)/2;
 
-        // Draw to temp canvas for white background removal
+        const iw = Math.max(1, Math.floor(dw));
+        const ih = Math.max(1, Math.floor(dh));
+
         const temp = document.createElement("canvas");
-        temp.width = dw;
-        temp.height = dh;
+        temp.width = iw;
+        temp.height = ih;
         const tctx = temp.getContext("2d");
-        tctx.drawImage(logoImg, 0, 0, dw, dh);
+        tctx.drawImage(logoImg, 0, 0, iw, ih);
 
-        const imgData = tctx.getImageData(0,0,dw,dh);
+        const imgData = tctx.getImageData(0,0,iw,ih);
         const data = imgData.data;
-
         for(let i=0;i<data.length;i+=4){
           const r=data[i], g=data[i+1], b=data[i+2];
-          // remove near-white background
-          if(r>240 && g>240 && b>240){
-            data[i+3]=0;
-          }
+          if(r>240 && g>240 && b>240) data[i+3]=0;
         }
         tctx.putImageData(imgData,0,0);
 
@@ -434,7 +439,6 @@
     function drawPhoto(){
       const box = { x: 720, y: 54, w: 220, h: 220, r: 18 };
 
-      // Frame
       ctx.save();
       ctx.lineWidth = 3;
       ctx.strokeStyle = "rgba(0,0,0,.16)";
@@ -445,34 +449,26 @@
       ctx.clip();
 
       if (photoImg){
-        // Cover crop
         const srcAR = photoImg.width / photoImg.height;
         const dstAR = box.w / box.h;
         let sx=0, sy=0, sw=photoImg.width, sh=photoImg.height;
         if (srcAR > dstAR){
-          // wider
           sh = photoImg.height;
           sw = sh * dstAR;
           sx = (photoImg.width - sw)/2;
         } else {
-          // taller
           sw = photoImg.width;
           sh = sw / dstAR;
           sy = (photoImg.height - sh)/2;
         }
         ctx.drawImage(photoImg, sx, sy, sw, sh, box.x, box.y, box.w, box.h);
       } else {
-        // Placeholder avatar
         const cx = box.x + box.w/2, cy = box.y + box.h/2;
         ctx.fillStyle = "#e9edf7";
         ctx.fillRect(box.x, box.y, box.w, box.h);
         ctx.fillStyle = "rgba(0,0,0,.16)";
-        ctx.beginPath();
-        ctx.arc(cx, cy-18, 42, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(cx, cy+58, 78, 56, 0, 0, Math.PI*2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy-18, 42, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(cx, cy+58, 78, 56, 0, 0, Math.PI*2); ctx.fill();
       }
 
       ctx.restore();
@@ -480,33 +476,27 @@
 
     function drawTextBlocks(data){
       ctx.save();
-      ctx.textBaseline = "alphabetic";
       ctx.textAlign = "left";
 
-      // ===== LEFT SIDE =====
+      // Left texts
       ctx.fillStyle = "rgba(17,24,39,.78)";
       ctx.font = "600 20px ui-sans-serif, system-ui";
       ctx.fillText(String(data.faculty || ""), 60, 270);
       ctx.fillText(String(data.department || ""), 60, 294);
 
-      // Name (moved slightly lower to avoid logo collision)
       ctx.fillStyle = "#111827";
       ctx.font = "800 40px ui-sans-serif, system-ui";
       ctx.fillText(String(data.name || ""), 60, 335);
 
-      // UID
       ctx.fillStyle = "rgba(17,24,39,.80)";
       ctx.font = "500 28px ui-sans-serif, system-ui";
       ctx.fillText(String(data.uid || ""), 60, 375);
 
-      // ===== SIGNATURE =====
+      // Signature
       const sx = 60, sy = 380, sw = 320, sh = 60;
       ctx.strokeStyle = "rgba(0,0,0,.20)";
       ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(sx, sy + sh);
-      ctx.lineTo(sx + sw, sy + sh);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sx, sy + sh); ctx.lineTo(sx + sw, sy + sh); ctx.stroke();
 
       ctx.fillStyle = "rgba(17,24,39,.55)";
       ctx.font = "500 13px ui-sans-serif, system-ui";
@@ -519,29 +509,29 @@
         const dx = sx + (sw - dw) / 2;
         const dy = sy + (sh - dh) / 2;
 
+        const iw = Math.max(1, Math.floor(dw));
+        const ih = Math.max(1, Math.floor(dh));
         const temp = document.createElement("canvas");
-        temp.width = dw;
-        temp.height = dh;
+        temp.width = iw;
+        temp.height = ih;
         const tctx = temp.getContext("2d");
-        tctx.drawImage(signatureImg, 0, 0, dw, dh);
-        const imgData = tctx.getImageData(0,0,dw,dh);
-        const pixels = imgData.data;
-        for(let i=0;i<pixels.length;i+=4){
-          const r=pixels[i], g=pixels[i+1], b=pixels[i+2];
-          if(r>240 && g>240 && b>240){ pixels[i+3]=0; }
+        tctx.drawImage(signatureImg, 0, 0, iw, ih);
+
+        const imgData = tctx.getImageData(0,0,iw,ih);
+        const px = imgData.data;
+        for(let i=0;i<px.length;i+=4){
+          const r=px[i], g=px[i+1], b=px[i+2];
+          if(r>240 && g>240 && b>240) px[i+3]=0;
         }
         tctx.putImageData(imgData,0,0);
         ctx.drawImage(temp, dx, dy);
       }
 
-      // ===== RIGHT SIDE TYPOGRAPHY =====
+      // Right texts
       const rx = 720;
-      let baseY = 305;   // pushed down to avoid touching photo
-      const gap = 45;    // tighter spacing
+      let baseY = 305;
+      const gap = 45;
 
-      ctx.textAlign = "left";
-
-      // DOB
       ctx.fillStyle = "rgba(17,24,39,.70)";
       ctx.font = "600 17px ui-sans-serif, system-ui";
       ctx.fillText("Date of Birth", rx, baseY);
@@ -549,7 +539,6 @@
       ctx.font = "700 30px ui-sans-serif, system-ui";
       ctx.fillText(formatDOB(data.dob), rx, baseY + 26);
 
-      // VALID THRU
       baseY += gap;
       ctx.fillStyle = "rgba(17,24,39,.70)";
       ctx.font = "600 17px ui-sans-serif, system-ui";
@@ -558,7 +547,6 @@
       ctx.font = "800 32px ui-sans-serif, system-ui";
       ctx.fillText(String(data.validThru || ""), rx, baseY + 28);
 
-      // ISSUED
       baseY += gap;
       ctx.fillStyle = "rgba(17,24,39,.70)";
       ctx.font = "600 17px ui-sans-serif, system-ui";
@@ -567,9 +555,133 @@
       ctx.font = "700 28px ui-sans-serif, system-ui";
       ctx.fillText(String(data.issuedYear || ""), rx, baseY + 26);
 
-      // MODE
       baseY += gap;
       ctx.fillStyle = "rgba(17,24,39,.65)";
       ctx.font = "600 20px ui-sans-serif, system-ui";
-      ctx.fillText(String(data.mod
+      ctx.fillText(String(data.mode || ""), rx, baseY);
 
+      ctx.restore();
+    }
+
+    function drawProgramBand(data, bannerColor){
+      const inset = 16;
+      const band = { x: inset, y: 470, w: canvas.width - inset*2, h: 84 };
+
+      ctx.save();
+      ctx.fillStyle = bannerColor;
+      ctx.fillRect(band.x, band.y, band.w, band.h);
+
+      const text = (data.program || "").toUpperCase();
+      const maxTextWidth = band.w - 120;
+      let fontSize = 46;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
+
+      while (fontSize >= 22){
+        ctx.font = `900 ${fontSize}px ui-sans-serif, system-ui`;
+        if (ctx.measureText(text).width <= maxTextWidth) break;
+        fontSize -= 2;
+      }
+
+      ctx.fillText(text, band.x + band.w/2, band.y + band.h/2);
+      ctx.restore();
+    }
+
+    function drawFooter(){
+      ctx.save();
+      ctx.strokeStyle = "rgba(0,0,0,.08)";
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(60, 560); ctx.lineTo(canvas.width-60, 560); ctx.stroke();
+      ctx.restore();
+    }
+
+    function render(){
+      const data = {
+        name: nameEl.value,
+        uid: uidEl.value,
+        dob: dobEl.value,
+        validThru: validEl.value,
+        program: bannerTextEl.value,
+        faculty: facultyEl ? facultyEl.value : DEFAULTS.faculty,
+        department: departmentEl ? departmentEl.value : DEFAULTS.department,
+        issuedYear: issuedEl ? issuedEl.value : DEFAULTS.issuedYear,
+        mode: modeEl.value
+      };
+
+      const accentColor = accentEl.value || DEFAULTS.accent;
+      const bannerColor = bannerColorEl ? bannerColorEl.value : DEFAULTS.bannerColor;
+
+      drawShadowedCard();
+      drawLogoBlock(accentColor);
+      drawPhoto();
+      drawTextBlocks(data);
+      drawProgramBand(data, bannerColor);
+      drawFooter();
+    }
+
+    async function onPhotoChange(){
+      photoImg = await loadImageFromFile(photoFileEl.files && photoFileEl.files[0]);
+      render();
+    }
+    async function onLogoChange(){
+      logoImg = await loadImageFromFile(logoFileEl.files && logoFileEl.files[0]);
+      render();
+    }
+    async function onSignatureChange(){
+      signatureImg = await loadImageFromFile(sigFileEl.files && sigFileEl.files[0]);
+      render();
+    }
+
+    function downloadPNG(){
+      render();
+      const dataURL = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = dataURL;
+      const safeName = String(nameEl.value || "student").trim().split(" ").filter(Boolean).join("_");
+      link.download = safeName + "_card.png";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function resetDefaults(){
+      nameEl.value = DEFAULTS.name;
+      uidEl.value = DEFAULTS.uid;
+      dobEl.value = DEFAULTS.dob;
+      validEl.value = DEFAULTS.validThru;
+      bannerTextEl.value = DEFAULTS.program;
+      modeEl.value = DEFAULTS.mode;
+      accentEl.value = DEFAULTS.accent;
+      bannerColorEl.value = DEFAULTS.bannerColor;
+      facultyEl.value = DEFAULTS.faculty;
+      departmentEl.value = DEFAULTS.department;
+      issuedEl.value = DEFAULTS.issuedYear;
+
+      photoFileEl.value = "";
+      logoFileEl.value = "";
+      sigFileEl.value = "";
+
+      photoImg = null;
+      logoImg = null;
+      signatureImg = null;
+      render();
+    }
+
+    // Live updates
+    [nameEl, uidEl, dobEl, validEl, bannerTextEl, modeEl, accentEl, bannerColorEl, facultyEl, departmentEl, issuedEl].forEach(el => {
+      el.addEventListener("input", render);
+      el.addEventListener("change", render);
+    });
+    photoFileEl.addEventListener("change", onPhotoChange);
+    logoFileEl.addEventListener("change", onLogoChange);
+    sigFileEl.addEventListener("change", onSignatureChange);
+    downloadBtn.addEventListener("click", downloadPNG);
+    resetBtn.addEventListener("click", resetDefaults);
+
+    // Start
+    render();
+  </script>
+</body>
+</html>
