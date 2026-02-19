@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student ID Card Builder (Canvas)</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a33;
+      --muted:#9fb0d0;
+      --text:#eaf0ff;
+      --line:rgba(255,255,255,.08);
+      --accent:#2bd67b;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(43,214,123,.20), transparent 55%),
+                  radial-gradient(1000px 650px at 110% 10%, rgba(76,125,255,.20), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      padding:24px;
+    }
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      gap:18px;
+    }
+    @media (max-width: 980px){
+      .wrap{grid-template-columns:1fr}
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+      overflow:hidden;
+    }
+    .panel{padding:16px}
+    h1{font-size:18px;margin:0 0 10px 0;letter-spacing:.2px}
+    .hint{font-size:12px;color:var(--muted);line-height:1.35;margin:0 0 14px 0}
+
+    .form{
+      display:grid;
+      gap:10px;
+    }
+    label{font-size:12px;color:var(--muted)}
+    input[type="text"], input[type="date"], input[type="number"], select{
+      width:100%;
+      padding:10px 11px;
+      background: rgba(0,0,0,.18);
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:12px;
+      outline:none;
+    }
+    input[type="text"]:focus, input[type="date"]:focus, input[type="number"]:focus, select:focus{
+      border-color: rgba(43,214,123,.55);
+      box-shadow: 0 0 0 3px rgba(43,214,123,.14);
+    }
+
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width: 480px){.row{grid-template-columns:1fr}}
+
+    .file{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px;
+      background: rgba(0,0,0,.16);
+      border:1px dashed rgba(255,255,255,.18);
+      border-radius:12px;
+    }
+    .file input{width:100%}
+
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+    button{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      cursor:pointer;
+    }
+    button.primary{background: rgba(43,214,123,.16); border-color: rgba(43,214,123,.35)}
+    button:hover{filter:brightness(1.05)}
+    .small{font-size:12px;color:var(--muted)}
+
+    .preview{
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .canvasWrap{
+      padding:14px;
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--line);
+      border-radius:18px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+    canvas{
+      max-width:100%;
+      height:auto;
+      border-radius:14px;
+      background:#fff;
+    }
+    .legend{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--line);background: rgba(255,255,255,.04)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- LEFT: CONTROLS -->
+    <div class="card">
+      <div class="panel">
+        <h1>Application Carte Étudiant (Editable)</h1>
+        <p class="hint">
+          Fenoy ny saha (anarana, DOB, UID, valid thru, programme). Afaka manova sary sy logo ianao.
+          Ny resultat dia mivoaka amin'ny <b>Canvas Preview</b> (azo sintonina PNG).
+        </p>
+
+        <div class="form">
+          <div>
+            <label>Anarana (Name)</label>
+            <input id="name" type="text" value="LEVELO NIOR" />
+          </div>
+
+          <div class="row">
+            <div>
+              <label>UID / Student ID</label>
+              <input id="uid" type="text" value="569752" />
+            </div>
+            <div>
+              <label>Banner Text (Programme)</label>
+              <input id="bannerText" type="text" value="PHYSICS AND SCIENCE" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>DOB</label>
+              <input id="dob" type="date" value="2005-09-25" />
+            </div>
+            <div>
+              <label>Valid Thru (Year)</label>
+              <input id="validThru" type="number" min="2000" max="2100" value="2030" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Learning Mode</label>
+              <select id="mode">
+                <option>Virtual Learning</option>
+                <option>On-Campus</option>
+                <option>Hybrid</option>
+              </select>
+            </div>
+            <div>
+              <label>Accent Color (Logo/Title)</label>
+              <select id="accent">
+                <option value="#2a7bcf">Blue</option>
+                <option value="#1f9d66">Green</option>
+                <option value="#7c3aed">Purple</option>
+                <option value="#ef4444">Red</option>
+                <option value="#111827">Dark</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Banner Color</label>
+              <input id="bannerColor" type="color" value="#1f9d66" />
+            </div>
+            <div>
+              <label>Note</label>
+              <input type="text" value="Manova ny 'Banner Text' etsy ambony" disabled />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Faculty</label>
+              <select id="faculty">
+                <option>Faculty of Science</option>
+                <option>Faculty of Engineering</option>
+                <option>Faculty of Arts</option>
+                <option>Faculty of Business</option>
+                <option>Faculty of Medicine</option>
+              </select>
+            </div>
+            <div>
+              <label>Department</label>
+              <select id="department">
+                <option>Department of Physics</option>
+                <option>Department of Mathematics</option>
+                <option>Department of Chemistry</option>
+                <option>Department of Biology</option>
+                <option>Department of Computer Science</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Issued (Year)</label>
+              <input id="issuedYear" type="number" min="2000" max="2100" value="2026" />
+            </div>
+            <div class="file" style="margin:0">
+              <div style="min-width:110px">
+                <label style="display:block">Signature</label>
+                <div class="small">PNG/JPG</div>
+              </div>
+              <input id="sigFile" type="file" accept="image/*" />
+            </div>
+          </div>
+
+          <div class="file">
+            <div style="min-width:110px">
+              <label style="display:block">Sary (Photo)</label>
+              <div class="small">PNG/JPG</div>
+            </div>
+            <input id="photoFile" type="file" accept="image/*" />
+          </div>
+
+          <div class="file">
+            <div style="min-width:110px">
+              <label style="display:block">Logo</label>
+              <div class="small">PNG/SVG/JPG</div>
+            </div>
+            <input id="logoFile" type="file" accept="image/*" />
+          </div>
+
+          <div class="btns">
+            <button class="primary" id="downloadBtn">Download PNG</button>
+            <button id="resetBtn">Reset Default</button>
+          </div>
+
+          <div class="small">
+            Tip: Raha tsy mametraka logo/sary ianao dia hiseho default (placeholder) foana.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: PREVIEW -->
+    <div class="card preview">
+      <div class="legend">
+        <div class="pill">Canvas Preview</div>
+        <div class="pill">Size: 1000 × 620 px</div>
+      </div>
+      <div class="canvasWrap">
+        <canvas id="cardCanvas" width="1000" height="620" aria-label="Student Card Preview"></canvas>
+      </div>
+      <div class="legend">
+        <div>Live update: rehefa manova input ianao dia miova avy hatrany ny preview.</div>
+        <div>Export: bokotra <b>Download PNG</b>.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    // UI Elements
+    const nameEl = $("name");
+    const uidEl = $("uid");
+    const dobEl = $("dob");
+    const validEl = $("validThru");
+    const bannerTextEl = $("bannerText");
+    const bannerColorEl = $("bannerColor");
+    const facultyEl = $("faculty");
+    const departmentEl = $("department");
+    const issuedEl = $("issuedYear");
+    const sigFileEl = $("sigFile");
+    const modeEl = $("mode");
+    const accentEl = $("accent");
+    const photoFileEl = $("photoFile");
+    const logoFileEl = $("logoFile");
+    const downloadBtn = $("downloadBtn");
+    const resetBtn = $("resetBtn");
+
+    // Canvas
+    const canvas = $("cardCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Image state
+    let photoImg = null;
+    let logoImg = null;
+    let signatureImg = null;
+
+    const DEFAULTS = {
+      name: "LEVELO NIOR",
+      uid: "569752",
+      dob: "2005-09-25",
+      validThru: "2030",
+      program: "PHYSICS AND SCIENCE",
+      mode: "Virtual Learning",
+      accent: "#2a7bcf",
+      bannerColor: "#1f9d66",
+      faculty: "Faculty of Science",
+      department: "Department of Physics",
+      issuedYear: "2026"
+    };
+
+    function pad2(n){ return String(n).padStart(2, "0"); }
+
+    function formatDOB(iso){
+      // Output: DD/MM/YYYY like your preview
+      if (!iso) return "";
+      const [y,m,d] = iso.split("-");
+      if (!y || !m || !d) return iso;
+      return `${pad2(d)}/${pad2(m)}/${y}`;
+    }
+
+    function loadImageFromFile(file){
+      return new Promise((resolve, reject) => {
+        if (!file) return resolve(null);
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function roundRect(c, x, y, w, h, r){
+      const rr = Math.min(r, w/2, h/2);
+      c.beginPath();
+      c.moveTo(x+rr, y);
+      c.arcTo(x+w, y, x+w, y+h, rr);
+      c.arcTo(x+w, y+h, x, y+h, rr);
+      c.arcTo(x, y+h, x, y, rr);
+      c.arcTo(x, y, x+w, y, rr);
+      c.closePath();
+    }
+
+    function drawShadowedCard(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      // Background
+      ctx.save();
+      ctx.fillStyle = "#f7f8fb";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      // Subtle vignette
+      const g = ctx.createRadialGradient(260, 80, 10, 260, 80, 900);
+      g.addColorStop(0, "rgba(0,0,0,0.05)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.restore();
+
+      // Outer rounded border
+      ctx.save();
+      ctx.strokeStyle = "rgba(0,0,0,.12)";
+      ctx.lineWidth = 3;
+      roundRect(ctx, 16, 16, canvas.width-32, canvas.height-32, 22);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawLogoBlock(accentColor){
+      const x = 60, y = 30;  // moved higher to avoid collision with faculty text
+      const w = 600, h = 200; // enlarged area
+
+      if (logoImg){
+        const ar = logoImg.width / logoImg.height;
+        let dw = w, dh = w / ar;
+        if (dh > h){ dh = h; dw = h * ar; }
+        const dx = x;
+        const dy = y + (h - dh)/2;
+
+        // Draw to temp canvas for white background removal
+        const temp = document.createElement("canvas");
+        temp.width = dw;
+        temp.height = dh;
+        const tctx = temp.getContext("2d");
+        tctx.drawImage(logoImg, 0, 0, dw, dh);
+
+        const imgData = tctx.getImageData(0,0,dw,dh);
+        const data = imgData.data;
+
+        for(let i=0;i<data.length;i+=4){
+          const r=data[i], g=data[i+1], b=data[i+2];
+          // remove near-white background
+          if(r>240 && g>240 && b>240){
+            data[i+3]=0;
+          }
+        }
+        tctx.putImageData(imgData,0,0);
+
+        ctx.drawImage(temp, dx, dy);
+        return;
+      }
+
+      // Placeholder
+      ctx.save();
+      ctx.fillStyle = accentColor;
+      ctx.font = "900 140px ui-sans-serif, system-ui";
+      ctx.textBaseline = "top";
+      ctx.fillText("UAF", x, y);
+
+      ctx.fillStyle = accentColor;
+      ctx.font = "700 30px ui-sans-serif, system-ui";
+      ctx.fillText("UNIVERSITY OF", x, y+140);
+      ctx.font = "900 60px ui-sans-serif, system-ui";
+      ctx.fillText("ALASKA", x, y+175);
+      ctx.restore();
+    }
+
+    function drawPhoto(){
+      const box = { x: 720, y: 54, w: 220, h: 220, r: 18 };
+
+      // Frame
+      ctx.save();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "rgba(0,0,0,.16)";
+      ctx.fillStyle = "#ffffff";
+      roundRect(ctx, box.x, box.y, box.w, box.h, box.r);
+      ctx.fill();
+      ctx.stroke();
+      ctx.clip();
+
+      if (photoImg){
+        // Cover crop
+        const srcAR = photoImg.width / photoImg.height;
+        const dstAR = box.w / box.h;
+        let sx=0, sy=0, sw=photoImg.width, sh=photoImg.height;
+        if (srcAR > dstAR){
+          // wider
+          sh = photoImg.height;
+          sw = sh * dstAR;
+          sx = (photoImg.width - sw)/2;
+        } else {
+          // taller
+          sw = photoImg.width;
+          sh = sw / dstAR;
+          sy = (photoImg.height - sh)/2;
+        }
+        ctx.drawImage(photoImg, sx, sy, sw, sh, box.x, box.y, box.w, box.h);
+      } else {
+        // Placeholder avatar
+        const cx = box.x + box.w/2, cy = box.y + box.h/2;
+        ctx.fillStyle = "#e9edf7";
+        ctx.fillRect(box.x, box.y, box.w, box.h);
+        ctx.fillStyle = "rgba(0,0,0,.16)";
+        ctx.beginPath();
+        ctx.arc(cx, cy-18, 42, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(cx, cy+58, 78, 56, 0, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function drawTextBlocks(data){
+      ctx.save();
+      ctx.textBaseline = "alphabetic";
+      ctx.textAlign = "left";
+
+      // ===== LEFT SIDE =====
+      ctx.fillStyle = "rgba(17,24,39,.78)";
+      ctx.font = "600 20px ui-sans-serif, system-ui";
+      ctx.fillText(String(data.faculty || ""), 60, 270);
+      ctx.fillText(String(data.department || ""), 60, 294);
+
+      // Name (moved slightly lower to avoid logo collision)
+      ctx.fillStyle = "#111827";
+      ctx.font = "800 40px ui-sans-serif, system-ui";
+      ctx.fillText(String(data.name || ""), 60, 335);
+
+      // UID
+      ctx.fillStyle = "rgba(17,24,39,.80)";
+      ctx.font = "500 28px ui-sans-serif, system-ui";
+      ctx.fillText(String(data.uid || ""), 60, 375);
+
+      // ===== SIGNATURE =====
+      const sx = 60, sy = 380, sw = 320, sh = 60;
+      ctx.strokeStyle = "rgba(0,0,0,.20)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy + sh);
+      ctx.lineTo(sx + sw, sy + sh);
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(17,24,39,.55)";
+      ctx.font = "500 13px ui-sans-serif, system-ui";
+      ctx.fillText("Signature", sx, sy + sh + 16);
+
+      if (signatureImg){
+        const ar = signatureImg.width / signatureImg.height;
+        let dw = sw, dh = sw / ar;
+        if (dh > sh){ dh = sh; dw = sh * ar; }
+        const dx = sx + (sw - dw) / 2;
+        const dy = sy + (sh - dh) / 2;
+
+        const temp = document.createElement("canvas");
+        temp.width = dw;
+        temp.height = dh;
+        const tctx = temp.getContext("2d");
+        tctx.drawImage(signatureImg, 0, 0, dw, dh);
+        const imgData = tctx.getImageData(0,0,dw,dh);
+        const pixels = imgData.data;
+        for(let i=0;i<pixels.length;i+=4){
+          const r=pixels[i], g=pixels[i+1], b=pixels[i+2];
+          if(r>240 && g>240 && b>240){ pixels[i+3]=0; }
+        }
+        tctx.putImageData(imgData,0,0);
+        ctx.drawImage(temp, dx, dy);
+      }
+
+      // ===== RIGHT SIDE TYPOGRAPHY =====
+      const rx = 720;
+      let baseY = 305;   // pushed down to avoid touching photo
+      const gap = 45;    // tighter spacing
+
+      ctx.textAlign = "left";
+
+      // DOB
+      ctx.fillStyle = "rgba(17,24,39,.70)";
+      ctx.font = "600 17px ui-sans-serif, system-ui";
+      ctx.fillText("Date of Birth", rx, baseY);
+      ctx.fillStyle = "#111827";
+      ctx.font = "700 30px ui-sans-serif, system-ui";
+      ctx.fillText(formatDOB(data.dob), rx, baseY + 26);
+
+      // VALID THRU
+      baseY += gap;
+      ctx.fillStyle = "rgba(17,24,39,.70)";
+      ctx.font = "600 17px ui-sans-serif, system-ui";
+      ctx.fillText("Valid Thru", rx, baseY);
+      ctx.fillStyle = "#111827";
+      ctx.font = "800 32px ui-sans-serif, system-ui";
+      ctx.fillText(String(data.validThru || ""), rx, baseY + 28);
+
+      // ISSUED
+      baseY += gap;
+      ctx.fillStyle = "rgba(17,24,39,.70)";
+      ctx.font = "600 17px ui-sans-serif, system-ui";
+      ctx.fillText("Issued", rx, baseY);
+      ctx.fillStyle = "#111827";
+      ctx.font = "700 28px ui-sans-serif, system-ui";
+      ctx.fillText(String(data.issuedYear || ""), rx, baseY + 26);
+
+      // MODE
+      baseY += gap;
+      ctx.fillStyle = "rgba(17,24,39,.65)";
+      ctx.font = "600 20px ui-sans-serif, system-ui";
+      ctx.fillText(String(data.mod
+
