@@ -141,6 +141,11 @@
           </div>
 
           <div class="field-group">
+            <label>Adiresy (School Address)</label>
+            <input id="schoolAddress" type="text" value="907 Yukon Dr, Fairbanks, AK 99775, USA" placeholder="Adiresin'ny sekoly..." />
+          </div>
+
+          <div class="field-group">
             <label>Anarana feno (Full Name)</label>
             <input id="fullName" type="text" value="Levelo Nior" placeholder="Anarana sy fanampiny..." />
           </div>
@@ -283,6 +288,7 @@
 
     // Dom Elements
     const schoolNameEl = $("schoolName");
+    const schoolAddressEl = $("schoolAddress");
     const fullNameEl = $("fullName");
     const uidEl = $("uid");
     const roleEl = $("role");
@@ -329,6 +335,7 @@
     function drawCard() {
       const data = {
         school: schoolNameEl.value,
+        address: schoolAddressEl.value,
         name: fullNameEl.value,
         uid: uidEl.value,
         role: roleEl.value,
@@ -364,15 +371,21 @@
         ctx.fillText("UAF", 45, 160);
       }
 
-      // SCHOOL NAME (DYNAMIC COLOR & CASE)
+      // SCHOOL NAME
       ctx.fillStyle = data.schoolColor;
       ctx.textAlign = "left";
       ctx.font = "900 26px sans-serif";
       ctx.fillText(data.school, 310, 110);
       
+      // OFFICIAL ACADEMIC CREDENTIALS
       ctx.font = "700 16px sans-serif";
       ctx.fillStyle = "rgba(0,0,0,0.5)";
       ctx.fillText("OFFICIAL ACADEMIC CREDENTIALS", 310, 140);
+
+      // SCHOOL ADDRESS
+      ctx.font = "600 14px sans-serif";
+      ctx.fillStyle = "rgba(0,0,0,0.4)";
+      ctx.fillText(data.address, 310, 165);
 
       // 4. Photo Area
       const px = 700, py = 45, pw = 250, ph = 250;
@@ -403,17 +416,17 @@
       ctx.fillText(data.faculty, 65, 275);
       ctx.fillText(data.dept, 65, 305);
 
-      // FULL NAME (DYNAMIC CASE & GRAS BE)
+      // FULL NAME
       ctx.fillStyle = "#000";
       ctx.font = "900 58px sans-serif";
       ctx.fillText(data.name, 65, 370);
 
-      // UID & ROLE (GRAS)
+      // UID & ROLE
       ctx.fillStyle = "rgba(0,0,0,0.5)";
       ctx.font = "800 32px sans-serif";
       ctx.fillText(`${data.uid} | ${data.role}`, 65, 420);
 
-      // SIGNATURE (Sonia)
+      // SIGNATURE
       const sigX = 65, sigY = 430, sigW = 280, sigH = 80;
       if(signatureImg) {
         ctx.drawImage(signatureImg, sigX, sigY, sigW, sigH);
@@ -461,7 +474,7 @@
     }
 
     // Event Listeners for Live Update
-    const inputs = [schoolNameEl, fullNameEl, uidEl, roleEl, dobEl, validThruEl, facultyEl, departmentEl, bannerTextEl, accentColorEl, schoolColorEl, bannerBgEl, issuedYearEl, learningModeEl];
+    const inputs = [schoolNameEl, schoolAddressEl, fullNameEl, uidEl, roleEl, dobEl, validThruEl, facultyEl, departmentEl, bannerTextEl, accentColorEl, schoolColorEl, bannerBgEl, issuedYearEl, learningModeEl];
     inputs.forEach(el => el.addEventListener("input", drawCard));
 
     photoFileEl.onchange = async () => { userImg = await processImage(photoFileEl.files[0]); drawCard(); };
