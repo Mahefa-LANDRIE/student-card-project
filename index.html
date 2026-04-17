@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Professional ID Card Builder v2.3</title>
+  <title>Professional ID Card Builder v2.4</title>
 
   <style>
     :root{
@@ -210,6 +210,12 @@
           <input id="bannerText" type="text" value="PHYSICS AND SCIENCE" />
         </div>
 
+        <!-- NEW FIELD FOR STAMP SCHOOL NAME -->
+        <div class="field">
+          <label>Stamp School Name (Fitomboka)</label>
+          <input id="stampSchoolName" type="text" value="Park University" placeholder="Anaran'ny oniversite ao amin'ny stamp..." />
+        </div>
+
         <div class="field">
           <label>Signature (Sonia)</label>
           <div class="file-box">
@@ -238,7 +244,7 @@
     <!-- PREVIEW -->
     <div class="preview-area">
       <div class="info-bar">
-        <b>Dika vaovao v2.3:</b> Nampiana "Security Pattern" any aoriana sy fanitsiana ny toerana misy ny sonia.
+        <b>Dika vaovao v2.4:</b> Afaka ovaina manokana izao ny anarana ao anatin'ilay fitomboka (Stamp).
       </div>
       <div class="canvas-box">
         <canvas id="cardCanvas" width="1000" height="620"></canvas>
@@ -330,7 +336,7 @@
         }
     }
 
-    function drawStamp(x, y, schoolName) {
+    function drawStamp(x, y, stampSchoolName) {
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(-0.1);
@@ -344,7 +350,7 @@
         ctx.font = "bold 20px sans-serif";
         ctx.fillText("APPROVED", 110, 50);
         ctx.font = "bold 11px sans-serif";
-        ctx.fillText(schoolName.toUpperCase(), 110, 68);
+        ctx.fillText(stampSchoolName.toUpperCase(), 110, 68);
         ctx.restore();
     }
 
@@ -362,7 +368,8 @@
         faculty: $("faculty").value,
         dept: $("department").value,
         banner: $("bannerText").value.toUpperCase(),
-        mode: $("mode").value
+        mode: $("mode").value,
+        stampSchool: $("stampSchoolName").value // Get separate stamp school name
       };
 
       // 1. Clean Canvas
@@ -443,7 +450,6 @@
       
       ctx.font = "italic 16px sans-serif";
       ctx.fillStyle = "#64748b";
-      // This is the label moved up slightly to be visible
       ctx.fillText("Authorized Registrar Signature", sigX, sigY + sigH + 5);
 
       // 6. Meta Data
@@ -468,7 +474,7 @@
       // 7. Security Features
       drawBarcode(60, 560, 250, 45);
       drawQR(400, 420, 110);
-      drawStamp(410, 245, d.school);
+      drawStamp(410, 245, d.stampSchool); // Use separate stamp school name
 
       // 8. Bottom Banner
       const bx = 20, by = 545, bw = 650, bh = 65;
