@@ -3,24 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ID Card Builder (Student/Teacher)</title>
+  <title>Professional ID Card Builder v2.3</title>
 
   <style>
     :root{
-      --bg:#0b1020;
-      --muted:#9fb0d0;
-      --text:#eaf0ff;
-      --line:rgba(255,255,255,.08);
-      --accent-glow: rgba(43,214,123,.20);
+      --bg:#0f172a;
+      --muted:#94a3b8;
+      --text:#f1f5f9;
+      --line:rgba(255,255,255,.1);
+      --accent:#2bd67b;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background:
-        radial-gradient(1200px 700px at 20% -10%, var(--accent-glow), transparent 55%),
-        radial-gradient(1000px 650px at 110% 10%, rgba(76,125,255,.20), transparent 55%),
-        var(--bg);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
       color:var(--text);
       padding:24px;
     }
@@ -28,283 +25,230 @@
       max-width:1400px;
       margin:0 auto;
       display:grid;
-      grid-template-columns: 420px 1fr;
-      gap:24px;
+      grid-template-columns: 450px 1fr;
+      gap:30px;
     }
-    @media (max-width: 1024px){
+    @media (max-width: 1100px){
       .wrap{grid-template-columns:1fr}
     }
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    .card-config{
+      background: #1e293b;
       border:1px solid var(--line);
-      border-radius:24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,.4);
-      overflow:hidden;
-      backdrop-filter: blur(10px);
+      border-radius:20px;
+      padding:24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,.3);
+      max-height: 95vh;
+      overflow-y: auto;
     }
-    .panel{padding:20px}
-    h1{font-size:20px;margin:0 0 8px 0; color: #fff}
-    .hint{font-size:12px;color:var(--muted);margin:0 0 20px 0}
+    h1{font-size:22px;margin:0 0 5px 0; color: #fff}
+    .hint{font-size:13px;color:var(--muted);margin:0 0 25px 0}
 
-    .form{display:grid;gap:12px}
-    .field-group{display:grid;gap:5px}
-    label{font-size:11px; font-weight: 600; text-transform: uppercase; color:var(--muted); letter-spacing: 0.5px}
+    .form-grid{display:grid;gap:15px}
+    .field{display:grid;gap:6px}
+    label{font-size:11px; font-weight: 700; text-transform: uppercase; color:var(--muted); letter-spacing: 0.05em}
     
-    input[type="text"], input[type="date"], input[type="number"], select, input[type="color"]{
+    input, select{
       width:100%;
       padding:12px;
-      background: rgba(0,0,0,.25);
+      background: rgba(15, 23, 42, 0.6);
       color:#fff;
       border:1px solid var(--line);
-      border-radius:12px;
+      border-radius:10px;
       outline:none;
       font-size: 14px;
-      transition: all 0.2s;
+      transition: border-color 0.2s;
     }
-    input[type="color"]{padding:5px; height: 45px; cursor: pointer}
-    input:focus, select:focus{
-      border-color: #2bd67b;
-      background: rgba(0,0,0,.4);
+    input:focus, select:focus{ border-color: var(--accent) }
+
+    .row-2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .file-box{
+      background: rgba(255,255,255,0.02);
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 10px;
     }
+    .file-box input{ font-size: 11px; border:none; padding: 5px }
 
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-    .file-input-wrapper{
-      display:flex;
-      flex-direction: column;
-      gap:8px;
-      padding:12px;
-      background: rgba(255,255,255,.03);
-      border:1px dashed rgba(255,255,255,.15);
-      border-radius:12px;
-    }
-    .file-input-wrapper input{ font-size: 11px; color: var(--muted) }
-
-    .btns{display:flex;gap:12px;margin-top:10px}
+    .btns{display:flex;gap:12px;margin-top:20px; padding-bottom: 20px;}
     button{
       flex: 1;
-      padding:14px;
+      padding:15px;
       border-radius:12px;
       border:none;
       font-weight: 700;
       cursor:pointer;
-      transition: .3s;
+      transition: 0.2s;
     }
-    .btn-download{ background: #2bd67b; color: #050a15 }
-    .btn-reset{ background: rgba(255,255,255,.1); color: #fff }
-    button:hover{ transform: translateY(-2px); filter: brightness(1.1) }
+    .btn-save{ background: var(--accent); color: #0f172a }
+    .btn-reset{ background: rgba(255,255,255,.05); color: #fff }
+    button:hover{ transform: translateY(-2px); opacity: 0.9 }
 
-    .preview-section{
+    .preview-area{
       position: sticky;
       top: 24px;
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 20px;
     }
-    .canvas-container{
-      background: rgba(0,0,0,.3);
-      padding: 20px;
+    .canvas-box{
+      background: #000;
+      padding: 40px;
       border-radius: 24px;
-      border: 1px solid var(--line);
       display: flex;
       justify-content: center;
       align-items: center;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
     }
     canvas{
       max-width:100%;
       height:auto;
-      border-radius:16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border-radius:18px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.8);
     }
-    .status-bar{
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--muted);
+    .info-bar{
+      background: rgba(255,255,255,0.05);
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.5;
     }
+    .info-bar b { color: var(--accent); }
   </style>
 </head>
 
 <body>
   <div class="wrap">
+    <!-- SETTINGS -->
+    <div class="card-config">
+      <h1>ID Card Configurator</h1>
+      <p class="hint">Amboary ny fepetra rehetra ahatonga ny karatra ho validé.</p>
 
-    <!-- LEFT: SETTINGS -->
-    <div class="card">
-      <div class="panel">
-        <h1>ID Card Configurator</h1>
-        <p class="hint">Amboary ny mombamomba ny sekoly sy ny olona ato.</p>
+      <div class="form-grid">
+        <div class="field">
+          <label>Anaran'ny Sekoly</label>
+          <input id="schoolName" type="text" value="Park University" />
+        </div>
 
-        <div class="form">
-          <div class="field-group">
-            <label>Sekoly (School Name)</label>
-            <input id="schoolName" type="text" value="University of Alaska" placeholder="Anaran'ny sekoly..." />
+        <div class="field">
+          <label>Adiresy</label>
+          <input id="schoolAddress" type="text" value="8700 NW River Park Dr, Parkville, MO 64152" />
+        </div>
+
+        <div class="field">
+          <label>Academic Year</label>
+          <input id="academicYear" type="text" value="Academic Year 2025 - 2026" />
+        </div>
+
+        <div class="field">
+          <label>Anarana feno</label>
+          <input id="fullName" type="text" value="Rakoto Landry" />
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>ID Number</label>
+            <input id="uid" type="text" value="576924" />
           </div>
-
-          <div class="field-group">
-            <label>Adiresy (School Address)</label>
-            <input id="schoolAddress" type="text" value="907 Yukon Dr, Fairbanks, AK 99775, USA" placeholder="Adiresin'ny sekoly..." />
+          <div class="field">
+            <label>Status/Role</label>
+            <select id="role">
+              <option value="STUDENT">STUDENT</option>
+              <option value="TEACHER">TEACHER</option>
+              <option value="STAFF">STAFF</option>
+              <option value="GRADUATE">GRADUATE</option>
+            </select>
           </div>
+        </div>
 
-          <div class="field-group">
-            <label>Anarana feno (Full Name)</label>
-            <input id="fullName" type="text" value="Levelo Nior" placeholder="Anarana sy fanampiny..." />
+        <div class="row-2">
+          <div class="field">
+            <label>Faculty</label>
+            <select id="faculty">
+              <option>Faculty of Science</option>
+              <option>Faculty of Engineering</option>
+              <option>Faculty of Arts & Humanities</option>
+              <option>Faculty of Business</option>
+              <option>Faculty of Medicine</option>
+              <option>Faculty of Information Technology</option>
+            </select>
           </div>
+          <div class="field">
+            <label>Department</label>
+            <input id="department" type="text" value="Department of Physics" />
+          </div>
+        </div>
 
-          <div class="row">
-            <div class="field-group">
-              <label>ID / UID Number</label>
-              <input id="uid" type="text" value="569752" />
-            </div>
-            <div class="field-group">
-              <label>Role</label>
-              <select id="role">
-                <option value="STUDENT">STUDENT</option>
-                <option value="TEACHER">TEACHER</option>
-                <option value="STAFF">STAFF</option>
-              </select>
-            </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Birth Date</label>
+            <input id="dob" type="date" value="2008-06-26" />
           </div>
+          <div class="field">
+            <label>Valid Thru</label>
+            <input id="validThru" type="text" value="2030" />
+          </div>
+        </div>
 
-          <div class="row">
-            <div class="field-group">
-              <label>Date of Birth</label>
-              <input id="dob" type="date" value="2005-09-25" />
-            </div>
-            <div class="field-group">
-              <label>Valid Thru (Year)</label>
-              <input id="validThru" type="number" value="2030" />
-            </div>
+        <div class="row-2">
+           <div class="field">
+            <label>Issued Date</label>
+            <input id="issued" type="text" value="2026" />
           </div>
+          <div class="field">
+            <label>Learning Mode</label>
+            <select id="mode">
+              <option value="Virtual Learning">Virtual Learning</option>
+              <option value="On-Campus">On-Campus</option>
+              <option value="Hybrid">Hybrid</option>
+            </select>
+          </div>
+        </div>
 
-          <div class="row">
-            <div class="field-group">
-              <label>Faculty</label>
-              <select id="faculty">
-                <option>Faculty of Science</option>
-                <option>Faculty of Engineering</option>
-                <option>Faculty of Arts</option>
-                <option>Faculty of Business</option>
-                <option>Faculty of Medicine</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label>Department</label>
-              <select id="department">
-                <option>Department of Physics</option>
-                <option>Department of Mathematics</option>
-                <option>Department of Chemistry</option>
-                <option>Department of Biology</option>
-                <option>Department of Computer Science</option>
-              </select>
-            </div>
-          </div>
+        <div class="field">
+          <label>Banner Text (Major)</label>
+          <input id="bannerText" type="text" value="PHYSICS AND SCIENCE" />
+        </div>
 
-          <div class="field-group">
-            <label>Banner Text (Programme/Major)</label>
-            <input id="bannerText" type="text" value="PHYSICS AND SCIENCE" />
+        <div class="field">
+          <label>Signature (Sonia)</label>
+          <div class="file-box">
+            <input id="sigFile" type="file" accept="image/*" />
           </div>
+        </div>
 
-          <div class="row">
-            <div class="field-group">
-              <label>School Name Color</label>
-              <input id="schoolColor" type="color" value="#2a7bcf" />
-            </div>
-            <div class="field-group">
-              <label>Banner Color</label>
-              <input id="bannerBg" type="color" value="#1f9d66" />
-            </div>
+        <div class="row-2">
+          <div class="file-box">
+            <label>User Photo</label>
+            <input id="photoFile" type="file" accept="image/*" />
           </div>
+          <div class="file-box">
+            <label>School Logo</label>
+            <input id="logoFile" type="file" accept="image/*" />
+          </div>
+        </div>
 
-          <div class="row">
-            <div class="field-group">
-              <label>Accent Color (Details)</label>
-              <select id="accentColor">
-                <option value="#2a7bcf">Blue Ocean</option>
-                <option value="#1f9d66">Forest Green</option>
-                <option value="#7c3aed">Royal Purple</option>
-                <option value="#ef4444">Electric Red</option>
-                <option value="#111827">Midnight Black</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label>Issued Year</label>
-              <input id="issuedYear" type="number" value="2026" />
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="field-group">
-              <label>Learning Mode</label>
-              <select id="learningMode">
-                <option>Virtual Learning</option>
-                <option>On-Campus</option>
-                <option>Hybrid</option>
-              </select>
-            </div>
-            <div class="file-input-wrapper">
-                <label>Signature (Sonia)</label>
-                <input id="sigFile" type="file" accept="image/*" />
-            </div>
-          </div>
-
-          <div class="row">
-             <div class="file-input-wrapper">
-                <label>Sary (Photo)</label>
-                <input id="photoFile" type="file" accept="image/*" />
-              </div>
-              <div class="file-input-wrapper">
-                <label>Logo an'ny Sekoly</label>
-                <input id="logoFile" type="file" accept="image/*" />
-              </div>
-          </div>
-
-          <div class="btns">
-            <button class="btn-download" id="downloadBtn">DOWNLOAD PNG</button>
-            <button class="btn-reset" id="resetBtn">RESET</button>
-          </div>
+        <div class="btns">
+          <button class="btn-save" id="downloadBtn">DOWNLOAD PNG</button>
+          <button class="btn-reset" id="resetBtn">RESET</button>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: LIVE PREVIEW -->
-    <div class="preview-section">
-      <div class="status-bar">
-        <span>LIVE PREVIEW</span>
-        <span>1000 x 620 PX</span>
+    <!-- PREVIEW -->
+    <div class="preview-area">
+      <div class="info-bar">
+        <b>Dika vaovao v2.3:</b> Nampiana "Security Pattern" any aoriana sy fanitsiana ny toerana misy ny sonia.
       </div>
-      <div class="canvas-container">
+      <div class="canvas-box">
         <canvas id="cardCanvas" width="1000" height="620"></canvas>
       </div>
-      <div class="status-bar">
-        <span>Ny fanovana dia mihatra avy hatrany.</span>
-        <span>Export amin'ny alalan'ny bokotra maitso.</span>
-      </div>
     </div>
-
   </div>
 
   <script>
     const $ = (id) => document.getElementById(id);
 
-    // Dom Elements
-    const schoolNameEl = $("schoolName");
-    const schoolAddressEl = $("schoolAddress");
-    const fullNameEl = $("fullName");
-    const uidEl = $("uid");
-    const roleEl = $("role");
-    const dobEl = $("dob");
-    const validThruEl = $("validThru");
-    const facultyEl = $("faculty");
-    const departmentEl = $("department");
-    const bannerTextEl = $("bannerText");
-    const accentColorEl = $("accentColor");
-    const schoolColorEl = $("schoolColor");
-    const bannerBgEl = $("bannerBg");
-    const issuedYearEl = $("issuedYear");
-    const learningModeEl = $("learningMode");
-    const photoFileEl = $("photoFile");
-    const logoFileEl = $("logoFile");
-    const sigFileEl = $("sigFile");
     const canvas = $("cardCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -312,7 +256,6 @@
     let schoolLogo = null;
     let signatureImg = null;
 
-    // Helper functions
     function formatDate(val) {
       if(!val) return "";
       const d = new Date(val);
@@ -332,168 +275,229 @@
       });
     }
 
+    // Pattern background for security feel
+    function drawSecurityPattern() {
+        ctx.save();
+        ctx.globalAlpha = 0.03;
+        ctx.fillStyle = "#000";
+        ctx.font = "bold 10px sans-serif";
+        for (let y = 0; y < canvas.height; y += 40) {
+            for (let x = 0; x < canvas.width; x += 150) {
+                ctx.fillText("OFFICIAL ID • VERIFIED • ", x, y);
+            }
+        }
+        ctx.restore();
+    }
+
+    function drawBarcode(x, y, w, h) {
+      ctx.fillStyle = "#000";
+      let currentX = 0;
+      while (currentX < w) {
+        let barW = Math.random() * 3 + 1;
+        if (currentX + barW > w) barW = w - currentX;
+        ctx.fillRect(x + currentX, y, barW, h);
+        currentX += barW + (Math.random() * 2 + 2);
+      }
+    }
+
+    function drawQR(x, y, size) {
+        const modules = 25; 
+        const modSize = size / modules;
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(x, y, size, size);
+        ctx.fillStyle = "#000";
+
+        function drawFinder(fx, fy) {
+            ctx.fillStyle = "#000";
+            ctx.fillRect(fx, fy, modSize * 7, modSize * 7);
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(fx + modSize, fy + modSize, modSize * 5, modSize * 5);
+            ctx.fillStyle = "#000";
+            ctx.fillRect(fx + modSize * 2, fy + modSize * 2, modSize * 3, modSize * 3);
+        }
+
+        drawFinder(x, y); 
+        drawFinder(x + size - modSize * 7, y); 
+        drawFinder(x, y + size - modSize * 7); 
+
+        for (let r = 0; r < modules; r++) {
+            for (let c = 0; c < modules; c++) {
+                if ((r < 8 && c < 8) || (r < 8 && c > modules - 9) || (r > modules - 9 && c < 8)) continue;
+                if (Math.random() > 0.5) {
+                    ctx.fillRect(x + c * modSize, y + r * modSize, modSize, modSize);
+                }
+            }
+        }
+    }
+
+    function drawStamp(x, y, schoolName) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(-0.1);
+        ctx.strokeStyle = "rgba(30, 64, 175, 0.4)";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(0, 0, 220, 80);
+        ctx.fillStyle = "rgba(30, 64, 175, 0.4)";
+        ctx.textAlign = "center";
+        ctx.font = "bold 13px sans-serif";
+        ctx.fillText("VERIFIED BY REGISTRAR", 110, 25);
+        ctx.font = "bold 20px sans-serif";
+        ctx.fillText("APPROVED", 110, 50);
+        ctx.font = "bold 11px sans-serif";
+        ctx.fillText(schoolName.toUpperCase(), 110, 68);
+        ctx.restore();
+    }
+
     function drawCard() {
-      const data = {
-        school: schoolNameEl.value,
-        address: schoolAddressEl.value,
-        name: fullNameEl.value,
-        uid: uidEl.value,
-        role: roleEl.value,
-        dob: formatDate(dobEl.value),
-        valid: validThruEl.value,
-        faculty: facultyEl.value,
-        dept: departmentEl.value,
-        banner: bannerTextEl.value.toUpperCase(),
-        accent: accentColorEl.value,
-        schoolColor: schoolColorEl.value,
-        bannerBg: bannerBgEl.value,
-        issued: issuedYearEl.value,
-        mode: learningModeEl.value
+      const d = {
+        school: $("schoolName").value,
+        address: $("schoolAddress").value,
+        academicYear: $("academicYear").value,
+        name: $("fullName").value,
+        uid: $("uid").value,
+        role: $("role").value,
+        dob: formatDate($("dob").value),
+        valid: $("validThru").value,
+        issued: $("issued").value,
+        faculty: $("faculty").value,
+        dept: $("department").value,
+        banner: $("bannerText").value.toUpperCase(),
+        mode: $("mode").value
       };
 
       // 1. Clean Canvas
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // 2. Security Background
+      drawSecurityPattern();
 
-      // 2. Main Border Effect
-      ctx.strokeStyle = "rgba(0,0,0,0.06)";
-      ctx.lineWidth = 15;
-      ctx.strokeRect(10, 10, canvas.width-20, canvas.height-20);
+      // Card border
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(4, 4, canvas.width-8, canvas.height-8);
 
-      // 3. School Branding Area
-      const logoSize = 250;
+      // 3. Header
       if(schoolLogo) {
-        ctx.drawImage(schoolLogo, 45, 30, logoSize, logoSize);
+        ctx.drawImage(schoolLogo, 50, 40, 210, 210);
       } else {
-        ctx.fillStyle = data.accent;
-        ctx.font = "900 130px sans-serif";
-        ctx.textAlign = "left";
-        ctx.fillText("UAF", 45, 160);
+        ctx.fillStyle = "#991b1b";
+        ctx.fillRect(50, 40, 210, 210);
       }
 
-      // SCHOOL NAME
-      ctx.fillStyle = data.schoolColor;
       ctx.textAlign = "left";
-      ctx.font = "900 26px sans-serif";
-      ctx.fillText(data.school, 310, 110);
-      
-      // OFFICIAL ACADEMIC CREDENTIALS
-      ctx.font = "700 16px sans-serif";
-      ctx.fillStyle = "rgba(0,0,0,0.5)";
-      ctx.fillText("OFFICIAL ACADEMIC CREDENTIALS", 310, 140);
+      ctx.fillStyle = "#991b1b";
+      ctx.font = "bold 34px sans-serif";
+      ctx.fillText(d.school, 290, 85);
 
-      // SCHOOL ADDRESS
-      ctx.font = "600 14px sans-serif";
-      ctx.fillStyle = "rgba(0,0,0,0.4)";
-      ctx.fillText(data.address, 310, 165);
+      ctx.fillStyle = "#64748b";
+      ctx.font = "bold 16px sans-serif";
+      ctx.fillText("OFFICIAL ACADEMIC CREDENTIALS", 290, 115);
 
-      // 4. Photo Area
-      const px = 700, py = 45, pw = 250, ph = 250;
-      ctx.fillStyle = "#f3f4f6";
-      ctx.beginPath();
-      ctx.roundRect(px, py, pw, ph, 24);
-      ctx.fill();
-      
+      ctx.font = "500 14px sans-serif";
+      ctx.fillText(d.address, 290, 140);
+
+      // Academic Year (Key)
+      ctx.fillStyle = "#1e40af";
+      ctx.font = "bold 20px sans-serif";
+      ctx.fillText(d.academicYear, 290, 175);
+
+      // 4. Photo
+      const px = 710, py = 45, pw = 250, ph = 280;
       ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(px, py, pw, ph, 15);
       ctx.clip();
+      ctx.fillStyle = "#f8fafc";
+      ctx.fillRect(px, py, pw, ph);
       if(userImg) {
         ctx.drawImage(userImg, px, py, pw, ph);
-      } else {
-        ctx.fillStyle = "#cbd5e1";
-        ctx.beginPath(); ctx.arc(px+pw/2, py+ph/2-20, 45, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.ellipse(px+pw/2, py+ph/2+65, 80, 50, 0, 0, Math.PI*2); ctx.fill();
       }
       ctx.restore();
-      
-      ctx.strokeStyle = "rgba(0,0,0,0.08)";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#cbd5e1";
       ctx.stroke();
 
-      // 5. Personal Details (Left Side)
-      ctx.textAlign = "left";
-      ctx.fillStyle = "rgba(0,0,0,0.6)";
-      ctx.font = "700 20px sans-serif";
-      ctx.fillText(data.faculty, 65, 275);
-      ctx.fillText(data.dept, 65, 305);
+      // 5. Details Section
+      ctx.fillStyle = "#475569";
+      ctx.font = "bold 20px sans-serif";
+      ctx.fillText(d.faculty, 60, 290);
+      ctx.font = "500 18px sans-serif";
+      ctx.fillText(d.dept, 60, 320);
 
-      // FULL NAME
-      ctx.fillStyle = "#000";
-      ctx.font = "900 58px sans-serif";
-      ctx.fillText(data.name, 65, 370);
+      ctx.fillStyle = "#000000";
+      ctx.font = "bold 64px sans-serif";
+      ctx.fillText(d.name, 60, 395);
 
-      // UID & ROLE
-      ctx.fillStyle = "rgba(0,0,0,0.5)";
-      ctx.font = "800 32px sans-serif";
-      ctx.fillText(`${data.uid} | ${data.role}`, 65, 420);
+      ctx.fillStyle = "#1e40af";
+      ctx.font = "800 36px sans-serif";
+      ctx.fillText(`${d.uid} | ${d.role}`, 60, 445);
 
-      // SIGNATURE
-      const sigX = 65, sigY = 430, sigW = 280, sigH = 80;
+      // Signature (Adjusted Position)
+      const sigX = 60, sigY = 460, sigW = 280, sigH = 70;
       if(signatureImg) {
-        ctx.drawImage(signatureImg, sigX, sigY, sigW, sigH);
+        ctx.drawImage(signatureImg, sigX, sigY - 10, sigW, sigH);
       }
-      ctx.strokeStyle = "rgba(0,0,0,0.15)";
+      ctx.strokeStyle = "#94a3b8";
       ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(sigX, sigY + sigH - 5); ctx.lineTo(sigX + sigW, sigY + sigH - 5); ctx.stroke();
-      ctx.font = "italic 14px sans-serif";
-      ctx.fillStyle = "rgba(0,0,0,0.4)";
-      ctx.fillText("Authorized Signature", sigX, sigY + sigH + 15);
+      ctx.beginPath(); ctx.moveTo(sigX, sigY + sigH - 15); ctx.lineTo(sigX + sigW, sigY + sigH - 15); ctx.stroke();
+      
+      ctx.font = "italic 16px sans-serif";
+      ctx.fillStyle = "#64748b";
+      // This is the label moved up slightly to be visible
+      ctx.fillText("Authorized Registrar Signature", sigX, sigY + sigH + 5);
 
-      // 6. Metadata (Right Side)
-      const rx = 700;
-      const metaYStart = 315;
-      const metaGap = 45;
-
-      const drawMeta = (label, val, y) => {
-        ctx.fillStyle = "rgba(0,0,0,0.5)";
-        ctx.font = "700 15px sans-serif";
-        ctx.fillText(label.toUpperCase(), rx, y);
+      // 6. Meta Data
+      const mx = 710;
+      const drawInfo = (label, val, y) => {
+        ctx.fillStyle = "#64748b";
+        ctx.font = "bold 14px sans-serif";
+        ctx.fillText(label.toUpperCase(), mx, y);
         ctx.fillStyle = "#000";
-        ctx.font = "900 26px sans-serif";
-        ctx.fillText(val, rx, y + 26);
+        ctx.font = "bold 28px sans-serif";
+        ctx.fillText(val, mx, y + 32);
       };
 
-      drawMeta("Date of Birth", data.dob, metaYStart);
-      drawMeta("Valid Thru", data.valid, metaYStart + metaGap * 1.6);
-      drawMeta("Issued", data.issued, metaYStart + metaGap * 3.2);
-      
-      ctx.fillStyle = "rgba(0,0,0,0.4)";
-      ctx.font = "700 20px sans-serif";
-      ctx.fillText(data.mode, rx, 515);
+      drawInfo("Date of Birth", d.dob, 355);
+      drawInfo("Valid Thru", d.valid, 435);
+      drawInfo("Issued Date", d.issued, 515);
 
-      // 7. Banner Band (Bottom)
-      const bx = 20, by = 535, bw = canvas.width - 40, bh = 70;
-      ctx.fillStyle = data.bannerBg;
+      ctx.fillStyle = "#64748b";
+      ctx.font = "bold 18px sans-serif";
+      ctx.fillText(d.mode, mx, 575);
+
+      // 7. Security Features
+      drawBarcode(60, 560, 250, 45);
+      drawQR(400, 420, 110);
+      drawStamp(410, 245, d.school);
+
+      // 8. Bottom Banner
+      const bx = 20, by = 545, bw = 650, bh = 65;
+      ctx.fillStyle = "#991b1b";
       ctx.beginPath();
-      ctx.roundRect(bx, by, bw, bh, 14);
+      ctx.roundRect(bx, by, bw, bh, 10);
       ctx.fill();
 
       ctx.fillStyle = "#ffffff";
       ctx.textAlign = "center";
-      ctx.font = "900 36px sans-serif";
-      ctx.fillText(data.banner, canvas.width/2, by + bh/2 + 15);
+      ctx.font = "bold 36px sans-serif";
+      ctx.fillText(d.banner, bx + bw/2, by + bh/2 + 12);
     }
 
-    // Event Listeners for Live Update
-    const inputs = [schoolNameEl, schoolAddressEl, fullNameEl, uidEl, roleEl, dobEl, validThruEl, facultyEl, departmentEl, bannerTextEl, accentColorEl, schoolColorEl, bannerBgEl, issuedYearEl, learningModeEl];
-    inputs.forEach(el => el.addEventListener("input", drawCard));
+    const allInputs = document.querySelectorAll('input, select');
+    allInputs.forEach(i => i.addEventListener('input', drawCard));
 
-    photoFileEl.onchange = async () => { userImg = await processImage(photoFileEl.files[0]); drawCard(); };
-    logoFileEl.onchange = async () => { schoolLogo = await processImage(logoFileEl.files[0]); drawCard(); };
-    sigFileEl.onchange = async () => { signatureImg = await processImage(sigFileEl.files[0]); drawCard(); };
+    $("photoFile").onchange = async (e) => { userImg = await processImage(e.target.files[0]); drawCard(); };
+    $("logoFile").onchange = async (e) => { schoolLogo = await processImage(e.target.files[0]); drawCard(); };
+    $("sigFile").onchange = async (e) => { signatureImg = await processImage(e.target.files[0]); drawCard(); };
 
-    // Buttons
     $("downloadBtn").onclick = () => {
       const link = document.createElement('a');
-      link.download = `ID_${fullNameEl.value.replace(/\s+/g, '_')}.png`;
+      link.download = `Student_ID_Official.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     };
 
-    $("resetBtn").onclick = () => {
-      if(confirm("Te hamerina ny zava-drehetra amin'ny default ve ianao?")) {
-        location.reload();
-      }
-    };
+    $("resetBtn").onclick = () => location.reload();
 
     window.onload = drawCard;
   </script>
