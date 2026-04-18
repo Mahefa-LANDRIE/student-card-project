@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Professional ID Card Builder v2.4</title>
+  <title>Professional ID Card Builder v2.7</title>
 
   <style>
     :root{
@@ -57,6 +57,15 @@
       outline:none;
       font-size: 14px;
       transition: border-color 0.2s;
+    }
+    input[type="color"] {
+      height: 45px;
+      padding: 5px;
+      cursor: pointer;
+    }
+    input[type="range"] {
+      padding: 0;
+      cursor: pointer;
     }
     input:focus, select:focus{ border-color: var(--accent) }
 
@@ -122,7 +131,7 @@
     <!-- SETTINGS -->
     <div class="card-config">
       <h1>ID Card Configurator</h1>
-      <p class="hint">Amboary ny fepetra rehetra ahatonga ny karatra ho validé.</p>
+      <p class="hint">Amboary ny loko sy ny haben'ny soratra rehetra.</p>
 
       <div class="form-grid">
         <div class="field">
@@ -130,19 +139,52 @@
           <input id="schoolName" type="text" value="Park University" />
         </div>
 
+        <div class="row-2">
+          <div class="field">
+            <label>Loko Anaran'ny Sekoly</label>
+            <input id="schoolNameColor" type="color" value="#991b1b" />
+          </div>
+          <div class="field">
+            <label>Loko Bannière (Ambany)</label>
+            <input id="bannerColor" type="color" value="#991b1b" />
+          </div>
+        </div>
+
         <div class="field">
           <label>Adiresy</label>
           <input id="schoolAddress" type="text" value="8700 NW River Park Dr, Parkville, MO 64152" />
         </div>
-
+        
         <div class="field">
-          <label>Academic Year</label>
-          <input id="academicYear" type="text" value="Academic Year 2025 - 2026" />
+          <label>Loko Adiresy (Gras ho azy)</label>
+          <input id="schoolAddressColor" type="color" value="#64748b" />
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Academic Year</label>
+            <input id="academicYear" type="text" value="Academic Year 2025 - 2026" />
+          </div>
+          <div class="field">
+            <label>Loko Academic Year</label>
+            <input id="academicYearColor" type="color" value="#1e40af" />
+          </div>
         </div>
 
         <div class="field">
           <label>Anarana feno</label>
           <input id="fullName" type="text" value="Rakoto Landry" />
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Loko Anarana feno</label>
+            <input id="fullNameColor" type="color" value="#000000" />
+          </div>
+          <div class="field">
+            <label>Habean'ny anarana</label>
+            <input id="fullNameFontSize" type="range" min="30" max="80" value="64" />
+          </div>
         </div>
 
         <div class="row-2">
@@ -163,19 +205,40 @@
 
         <div class="row-2">
           <div class="field">
+            <label>Loko ID & Role</label>
+            <input id="uidColor" type="color" value="#1e40af" />
+          </div>
+          <div class="field">
+            <label>Habean'ny ID & Role</label>
+            <input id="uidFontSize" type="range" min="20" max="50" value="36" />
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
             <label>Faculty</label>
             <select id="faculty">
-              <option>Faculty of Science</option>
-              <option>Faculty of Engineering</option>
-              <option>Faculty of Arts & Humanities</option>
-              <option>Faculty of Business</option>
+              <option>Faculty of Law & Political Science</option>
+              <option>Faculty of Arts, Music & Humanities</option>
+              <option>Faculty of Communication & Media</option>
+              <option>Faculty of Science & Technology</option>
+              <option>Faculty of Business & Economics</option>
               <option>Faculty of Medicine</option>
-              <option>Faculty of Information Technology</option>
             </select>
           </div>
           <div class="field">
             <label>Department</label>
-            <input id="department" type="text" value="Department of Physics" />
+            <select id="department">
+              <option>Department of Law</option>
+              <option>Department of Communication</option>
+              <option>Department of Fine Arts</option>
+              <option>Department of Music & Performing Arts</option>
+              <option>Department of Journalism</option>
+              <option>Department of Physics</option>
+              <option>Department of Mathematics</option>
+              <option>Department of Computer Science</option>
+              <option>Department of Economics</option>
+            </select>
           </div>
         </div>
 
@@ -210,10 +273,9 @@
           <input id="bannerText" type="text" value="PHYSICS AND SCIENCE" />
         </div>
 
-        <!-- NEW FIELD FOR STAMP SCHOOL NAME -->
         <div class="field">
           <label>Stamp School Name (Fitomboka)</label>
-          <input id="stampSchoolName" type="text" value="Park University" placeholder="Anaran'ny oniversite ao amin'ny stamp..." />
+          <input id="stampSchoolName" type="text" value="Park University" />
         </div>
 
         <div class="field">
@@ -244,7 +306,7 @@
     <!-- PREVIEW -->
     <div class="preview-area">
       <div class="info-bar">
-        <b>Dika vaovao v2.4:</b> Afaka ovaina manokana izao ny anarana ao anatin'ilay fitomboka (Stamp).
+        <b>Fanavaozana v2.7:</b> Azo ovaina ny loko sy ny haben'ny ID & Role, ary azo ovaina loko sady gras ny Adiresy.
       </div>
       <div class="canvas-box">
         <canvas id="cardCanvas" width="1000" height="620"></canvas>
@@ -281,7 +343,6 @@
       });
     }
 
-    // Pattern background for security feel
     function drawSecurityPattern() {
         ctx.save();
         ctx.globalAlpha = 0.03;
@@ -357,19 +418,27 @@
     function drawCard() {
       const d = {
         school: $("schoolName").value,
+        schoolColor: $("schoolNameColor").value,
+        bannerColor: $("bannerColor").value,
         address: $("schoolAddress").value,
+        addressColor: $("schoolAddressColor").value,
         academicYear: $("academicYear").value,
+        academicYearColor: $("academicYearColor").value,
         name: $("fullName").value,
+        nameColor: $("fullNameColor").value,
+        nameSize: $("fullNameFontSize").value,
         uid: $("uid").value,
+        uidColor: $("uidColor").value,
+        uidSize: $("uidFontSize").value,
         role: $("role").value,
         dob: formatDate($("dob").value),
         valid: $("validThru").value,
         issued: $("issued").value,
         faculty: $("faculty").value,
         dept: $("department").value,
-        banner: $("bannerText").value.toUpperCase(),
+        bannerText: $("bannerText").value.toUpperCase(),
         mode: $("mode").value,
-        stampSchool: $("stampSchoolName").value // Get separate stamp school name
+        stampSchool: $("stampSchoolName").value
       };
 
       // 1. Clean Canvas
@@ -388,12 +457,12 @@
       if(schoolLogo) {
         ctx.drawImage(schoolLogo, 50, 40, 210, 210);
       } else {
-        ctx.fillStyle = "#991b1b";
+        ctx.fillStyle = d.schoolColor;
         ctx.fillRect(50, 40, 210, 210);
       }
 
       ctx.textAlign = "left";
-      ctx.fillStyle = "#991b1b";
+      ctx.fillStyle = d.schoolColor;
       ctx.font = "bold 34px sans-serif";
       ctx.fillText(d.school, 290, 85);
 
@@ -401,13 +470,15 @@
       ctx.font = "bold 16px sans-serif";
       ctx.fillText("OFFICIAL ACADEMIC CREDENTIALS", 290, 115);
 
-      ctx.font = "500 14px sans-serif";
+      // Address (Bold and Editable Color)
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillStyle = d.addressColor;
       ctx.fillText(d.address, 290, 140);
 
-      // Academic Year (Key)
-      ctx.fillStyle = "#1e40af";
-      ctx.font = "bold 20px sans-serif";
-      ctx.fillText(d.academicYear, 290, 175);
+      // Academic Year
+      ctx.fillStyle = d.academicYearColor;
+      ctx.font = "bold 28px sans-serif";
+      ctx.fillText(d.academicYear, 290, 185);
 
       // 4. Photo
       const px = 710, py = 45, pw = 250, ph = 280;
@@ -431,15 +502,17 @@
       ctx.font = "500 18px sans-serif";
       ctx.fillText(d.dept, 60, 320);
 
-      ctx.fillStyle = "#000000";
-      ctx.font = "bold 64px sans-serif";
+      // Full Name
+      ctx.fillStyle = d.nameColor;
+      ctx.font = `bold ${d.nameSize}px sans-serif`;
       ctx.fillText(d.name, 60, 395);
 
-      ctx.fillStyle = "#1e40af";
-      ctx.font = "800 36px sans-serif";
+      // ID Number & Role (Editable Color and Size)
+      ctx.fillStyle = d.uidColor;
+      ctx.font = `800 ${d.uidSize}px sans-serif`;
       ctx.fillText(`${d.uid} | ${d.role}`, 60, 445);
 
-      // Signature (Adjusted Position)
+      // Signature
       const sigX = 60, sigY = 460, sigW = 280, sigH = 70;
       if(signatureImg) {
         ctx.drawImage(signatureImg, sigX, sigY - 10, sigW, sigH);
@@ -474,11 +547,11 @@
       // 7. Security Features
       drawBarcode(60, 560, 250, 45);
       drawQR(400, 420, 110);
-      drawStamp(410, 245, d.stampSchool); // Use separate stamp school name
+      drawStamp(410, 245, d.stampSchool);
 
       // 8. Bottom Banner
       const bx = 20, by = 545, bw = 650, bh = 65;
-      ctx.fillStyle = "#991b1b";
+      ctx.fillStyle = d.bannerColor;
       ctx.beginPath();
       ctx.roundRect(bx, by, bw, bh, 10);
       ctx.fill();
@@ -486,7 +559,7 @@
       ctx.fillStyle = "#ffffff";
       ctx.textAlign = "center";
       ctx.font = "bold 36px sans-serif";
-      ctx.fillText(d.banner, bx + bw/2, by + bh/2 + 12);
+      ctx.fillText(d.bannerText, bx + bw/2, by + bh/2 + 12);
     }
 
     const allInputs = document.querySelectorAll('input, select');
